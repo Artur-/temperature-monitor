@@ -1,0 +1,23 @@
+<div>
+	Senaste mätning: {{last.temperature}} ({{last.time}})
+	<vaadin-line-chart id="last-24h">
+    	<chart-title>Senaste 24h</chart-title>
+    	<y-axis min="-5">
+        	<chart-title align="high">Temperatur (°C)</chart-title>
+    	</y-axis>
+
+			<tooltip formatter="function() {return '' + this.series.name + ' ' + this.x + ': ' + this.y + '°C';}"></tooltip>
+			<plot-options>
+	        <line>
+	            <data-labels enabled="true"></data-labels>
+	        </line>
+	    </plot-options>
+			<data-series name="Väderskåpet" [data]="debugger;last24HMeasurementValues">
+	    </data-series>
+
+	</vaadin-line-chart>
+
+	<div *ngFor="let m of last24HMeasurements">
+		<span>{{m.time}}</span> <span>{{m.temperature}}</span>
+	</div>
+</div>
