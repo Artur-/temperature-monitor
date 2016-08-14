@@ -18,18 +18,29 @@ package org.vaadin.artur.temperature;
 import javax.servlet.annotation.WebServlet;
 
 import org.vaadin.artur.temperature.Servlet.RouterConf;
+import org.vaadin.artur.temperature.Servlet.TemperatureUI;
 
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.hummingbird.router.RouterConfiguration;
 import com.vaadin.hummingbird.router.RouterConfigurator;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.ui.UI;
 
 /**
  * The main servlet for the application.
  */
-@WebServlet(urlPatterns = "/*", name = "TemperatureServlet", asyncSupported = true)
-@VaadinServletConfiguration(routerConfigurator = RouterConf.class, productionMode = false)
+@WebServlet(urlPatterns = "/*", name = "TemperatureServlet", asyncSupported = true
+// , initParams =
+// @WebInitParam(name = "org.atmosphere.websocket.maxIdleTime", value = "10000")
+)
+@VaadinServletConfiguration(routerConfigurator = RouterConf.class, productionMode = false, ui = TemperatureUI.class)
 public class Servlet extends VaadinServlet {
+
+    @Push
+    public static class TemperatureUI extends UI {
+
+    }
 
     /**
      * The router configurator defines the how to map URLs to views.

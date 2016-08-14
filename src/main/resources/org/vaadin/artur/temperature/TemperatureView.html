@@ -1,23 +1,33 @@
-<div>
-	Senaste mätning: {{last.temperature}} ({{last.time}})
-	<vaadin-line-chart id="last-24h">
-    	<chart-title>Senaste 24h</chart-title>
-    	<y-axis min="-5">
+<div >
+	<vaadin-spline-chart id="last-24h">
+    	<chart-title>Temperatur senaste 24h</chart-title>
+    	<x-axis type="datetime">
+    	</x-axis>
+    	<y-axis >
         	<chart-title align="high">Temperatur (°C)</chart-title>
     	</y-axis>
-
-			<tooltip formatter="function() {return '' + this.series.name + ' ' + this.x + ': ' + this.y + '°C';}"></tooltip>
-			<plot-options>
+<!-- 			<tooltip formatter="function() {return '' + this.series.name + ' ' + this.x + ': ' + this.y + '°C';}"></tooltip> -->
+		<plot-options>
 	        <line>
 	            <data-labels enabled="true"></data-labels>
 	        </line>
 	    </plot-options>
-			<data-series name="Väderskåpet" [data]="debugger;last24HMeasurementValues">
-	    </data-series>
+			<data-series name="Vardagsrummet" connectNulls="false" [data]="last24HMeasurements.map(function(value) {return [value.timestamp, value.temperature];})"></data-series>
+	</vaadin-spline-chart>
 
-	</vaadin-line-chart>
+<!-- 	<vaadin-spline-chart id="last-7d"> -->
+<!--     	<chart-title>Temperatur senaste 7 dagar</chart-title> -->
+<!--     	<x-axis type="datetime"> -->
+<!--     	</x-axis> -->
+<!--     	<y-axis > -->
+<!--         	<chart-title align="high">Temperatur (°C)</chart-title> -->
+<!--     	</y-axis> -->
+<!-- 		<plot-options> -->
+<!-- 	        <line> -->
+<!-- 	            <data-labels enabled="true"></data-labels> -->
+<!-- 	        </line> -->
+<!-- 	    </plot-options> -->
+<!-- 			<data-series name="Vardagsrummet" connectNulls="false" [data]="last7DaysMeasurements.map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+<!-- 	</vaadin-spline-chart> -->
 
-	<div *ngFor="let m of last24HMeasurements">
-		<span>{{m.time}}</span> <span>{{m.temperature}}</span>
-	</div>
 </div>

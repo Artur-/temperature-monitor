@@ -1,0 +1,21 @@
+{
+  "name": "temperature-monitor",
+  "authors": [
+    "Artur Signell <artur@vaadin.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "Apache-2.0",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vaadin-charts": "3.1.0"
+  }
+}

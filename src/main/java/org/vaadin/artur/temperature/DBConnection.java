@@ -55,33 +55,51 @@ public class DBConnection {
     }
 
     public void storeMeasurement(LocalDateTime time, double value,
-            String sensor, String location) {
+            String sensor) {
         withConnection(connection -> {
             PreparedStatement s = connection.prepareStatement(
-                    "INSERT INTO log (datetime, temperature, sensor, location) VALUES (?,?,?,?)");
+                    "INSERT INTO log (datetime, temperature, sensor) VALUES (?,?,?)");
 
             Timestamp stamp = Timestamp.valueOf(time);
             s.setTimestamp(1, stamp);
             s.setDouble(2, value);
             s.setString(3, sensor);
-            s.setString(4, location);
             s.execute();
         });
 
     }
 
-    public List<Measurement> getMeasurements(LocalDateTime since) {
+    public List<String> getSensors() {
+        List<String> sensors = new ArrayList<>();
+
+        withConnection(connection -> {
+            PreparedStatement s = connection.prepareStatement(
+                    "SELECT distinct(sensor) as sensor FROM log");
+            ResultSet rs = s.executeQuery();
+            while (rs.next()) {
+                sensors.add(rs.getString("sensor"));
+
+            }
+        });
+        return sensors;
+
+    }
+
+    public List<Measurement> getAllMeasurements(String sensor,
+            LocalDateTime after) {
         List<Measurement> result = new ArrayList<>();
         withConnection(connection -> {
             PreparedStatement s = connection.prepareStatement(
-                    "SELECT datetime,temperature,location FROM log where datetime >= ?");
-            s.setTimestamp(1, Timestamp.valueOf(since));
+                    "SELECT datetime,temperature,sensor FROM log where datetime > ? AND sensor = ?");
+            s.setTimestamp(1, Timestamp.valueOf(after));
+            s.setString(2, sensor);
+
             ResultSet rs = s.executeQuery();
             while (rs.next()) {
                 LocalDateTime time = rs.getTimestamp("datetime")
                         .toLocalDateTime();
                 Measurement measurement = new Measurement(time,
-                        rs.getDouble("temperature"), rs.getString("location"));
+                        rs.getDouble("temperature"), rs.getString("sensor"));
                 result.add(measurement);
 
             }
@@ -89,16 +107,17 @@ public class DBConnection {
         return result;
     }
 
-    public Measurement getLastMeasurement() {
+    public Measurement getLastMeasurement(String sensor) {
         AtomicReference<Measurement> m = new AtomicReference<>();
         withConnection(connection -> {
             PreparedStatement s = connection.prepareStatement(
-                    "SELECT datetime,temperature,location FROM log ORDER BY datetime DESC LIMIT 1");
+                    "SELECT datetime,temperature,sensor FROM log WHERE sensor=? ORDER BY datetime DESC LIMIT 1");
+            s.setString(1, sensor);
             ResultSet rs = s.executeQuery();
             rs.next();
             LocalDateTime time = rs.getTimestamp("datetime").toLocalDateTime();
             Measurement measurement = new Measurement(time,
-                    rs.getDouble("temperature"), rs.getString("location"));
+                    rs.getDouble("temperature"), rs.getString("sensor"));
             m.set(measurement);
         });
         return m.get();

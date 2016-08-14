@@ -7,7 +7,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<hummingbird.version>0.0.15</hummingbird.version>
+		<hummingbird.version>0.0.16-SNAPSHOT</hummingbird.version>
 		<jetty.version>9.3.11.v20160721</jetty.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -66,6 +66,16 @@
 					<stopPort>8081</stopPort>
 					<stopWait>5</stopWait>
 					<stopKey>foo</stopKey>
+<!--
+					<webAppConfig>
+						<resourceBases>
+							<resourceBase>${project.basedir}/src/main/webapp</resourceBase>
+							<resourceBase>${project.basedir}/../../hummingbird/hummingbird/hummingbird-server/src/main/resources/META-INF/resources</resourceBase>
+							<resourceBase>${project.basedir}/../../hummingbird/hummingbird/hummingbird-client/target/classes/META-INF/resources</resourceBase>
+							<resourceBase>${project.basedir}/../../hummingbird/hummingbird/hummingbird-push/src/main/resources/META-INF/resources</resourceBase>
+						</resourceBases>
+					</webAppConfig>
+-->
 				</configuration>
 			</plugin>
 		</plugins>
