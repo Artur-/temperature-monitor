@@ -25,6 +25,10 @@ public class Measurement implements Serializable {
     public double getTimestamp() {
         // Highcharts uses UTC
         // long is not supported by Hummingbird
+        return localDateTimeToHighcharts(time);
+    }
+
+    public static double localDateTimeToHighcharts(LocalDateTime time) {
         return time.toEpochSecond(ZoneOffset.UTC) * 1000;
     }
 

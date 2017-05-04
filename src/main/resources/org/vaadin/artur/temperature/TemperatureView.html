@@ -1,7 +1,10 @@
-<div >
+<div>
 	<vaadin-spline-chart id="last-24h">
     	<chart-title>Temperatur senaste 24h</chart-title>
-    	<x-axis type="datetime">
+    	  <navigator enabled="true" margin="75" />
+<!--     	  <range-selector enabled="true" selected="4" /> -->
+<!--     	<x-axis type="datetime" [attr.min]="chartsStart"> -->
+    	<x-axis type="datetime" min="1471205717557.0">
     	</x-axis>
     	<y-axis >
         	<chart-title align="high">Temperatur (°C)</chart-title>
@@ -9,10 +12,18 @@
 <!-- 			<tooltip formatter="function() {return '' + this.series.name + ' ' + this.x + ': ' + this.y + '°C';}"></tooltip> -->
 		<plot-options>
 	        <line>
-	            <data-labels enabled="true"></data-labels>
+	            <data-labels enabled="true" ></data-labels>
 	        </line>
 	    </plot-options>
-			<data-series name="Vardagsrummet" connectNulls="false" [data]="last24HMeasurements.map(function(value) {return [value.timestamp, value.temperature];})"></data-series>
+	    <!-- working for loop with a map would be nice.. -->
+		#tpl#
+		<data-series name="#name#" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='#id#'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series>
+		#tpl#
+
+<!-- 		<data-series *ngFor="let sensor of sensors" name="sensor" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor==sensor}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+<!-- 		<data-series name="000007404fe5" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='000007404fe5'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+<!-- 		<data-series name="0000073fce42" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='0000073fce42'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+<!-- 		<data-series name="0000074083ce" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='0000074083ce'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
 	</vaadin-spline-chart>
 
 <!-- 	<vaadin-spline-chart id="last-7d"> -->

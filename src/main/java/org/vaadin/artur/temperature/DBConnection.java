@@ -69,30 +69,30 @@ public class DBConnection {
 
     }
 
-    public List<String> getSensors() {
-        List<String> sensors = new ArrayList<>();
+    public List<Sensor> getSensors() {
+        List<Sensor> sensors = new ArrayList<>();
 
         withConnection(connection -> {
-            PreparedStatement s = connection.prepareStatement(
-                    "SELECT distinct(sensor) as sensor FROM log");
+            PreparedStatement s = connection
+                    .prepareStatement("SELECT id,location FROM sensor");
             ResultSet rs = s.executeQuery();
             while (rs.next()) {
-                sensors.add(rs.getString("sensor"));
-
+                sensors.add(new Sensor(rs.getString("id"),
+                        rs.getString("location")));
             }
         });
         return sensors;
 
     }
 
-    public List<Measurement> getAllMeasurements(String sensor,
+    public List<Measurement> getAllMeasurements(String sensorId,
             LocalDateTime after) {
         List<Measurement> result = new ArrayList<>();
         withConnection(connection -> {
             PreparedStatement s = connection.prepareStatement(
                     "SELECT datetime,temperature,sensor FROM log where datetime > ? AND sensor = ?");
             s.setTimestamp(1, Timestamp.valueOf(after));
-            s.setString(2, sensor);
+            s.setString(2, sensorId);
 
             ResultSet rs = s.executeQuery();
             while (rs.next()) {
@@ -107,12 +107,12 @@ public class DBConnection {
         return result;
     }
 
-    public Measurement getLastMeasurement(String sensor) {
+    public Measurement getLastMeasurement(Sensor sensor) {
         AtomicReference<Measurement> m = new AtomicReference<>();
         withConnection(connection -> {
             PreparedStatement s = connection.prepareStatement(
                     "SELECT datetime,temperature,sensor FROM log WHERE sensor=? ORDER BY datetime DESC LIMIT 1");
-            s.setString(1, sensor);
+            s.setString(1, sensor.getId());
             ResultSet rs = s.executeQuery();
             rs.next();
             LocalDateTime time = rs.getTimestamp("datetime").toLocalDateTime();
