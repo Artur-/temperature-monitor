@@ -1,0 +1,52 @@
+<link rel="import" href="bower_components/polymer/polymer-element.html">
+<link rel="import" href="bower_components/vaadin-charts/vaadin-chart.html">
+
+<dom-module id="temperature-view">
+	<template>
+		<div>
+			<vaadin-chart type="spline" id="last-24h" title="Temperatur senaste 24h">
+				<navigator enabled="true"></navigator>
+				<x-axis type="datetime" min="1471205717557.0"> </x-axis>
+				<y-axis>
+					<chart-title align="high">Temperatur (°C)</chart-title>
+				</y-axis>
+				<plot-options>
+					<line>
+						<data-labels enabled="true"></data-labels>
+					</line>
+				</plot-options>
+				<template is="dom-repeat" items="{{last24HMeasurements}}" as="sensordata">
+					<template is="dom-repeat" items="{{sensordata.measurements}}">
+
+					</template>
+				</template>
+
+				<!-- working for loop with a map would be nice.. -->
+				<data-series name="#name#" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='#id#'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series>
+				<!-- 		<data-series *ngFor="let sensor of sensors" name="sensor" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor==sensor}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+				<!-- 		<data-series name="000007404fe5" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='000007404fe5'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+				<!-- 		<data-series name="0000073fce42" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='0000073fce42'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+				<!-- 		<data-series name="0000074083ce" connectNulls="false" [data]="last24HMeasurements.filter(function(value){return value.sensor=='0000074083ce'}).map(function(value) {return [value.timestamp, value.temperature];})"></data-series> -->
+			</vaadin-chart>
+
+			<template is="dom-repeat" items="{{last24HMeasurements}}" as="sensordata">
+				<div>Sensor: {{sensordata.sensor.id}}</div>
+				<div>Data:
+					<br>
+					<template is="dom-repeat" items="{{sensordata.measurements}}">
+						<div>{{item.time}}: {{item.temperature}}</div>
+					</template>
+				</div>
+			</template>
+
+		</div>
+	</template>
+	<script>
+
+		class TemperatureView extends Polymer.Element {
+			static get is() {
+				return 'temperature-view';
+			}
+		}
+		customElements.define(TemperatureView.is, TemperatureView);
+	</script> </dom-module>

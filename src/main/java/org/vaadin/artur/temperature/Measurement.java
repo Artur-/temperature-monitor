@@ -10,21 +10,20 @@ import java.util.Locale;
 public class Measurement implements Serializable {
     private LocalDateTime time;
     private double temperature;
-    private String sensor;
+//    private String sensor;
 
     public Measurement() {
 
     }
 
-    public Measurement(LocalDateTime time, double temperature, String sensor) {
+    public Measurement(LocalDateTime time, double temperature) {
         this.time = time;
         this.temperature = temperature;
-        this.sensor = sensor;
     }
 
     public double getTimestamp() {
         // Highcharts uses UTC
-        // long is not supported by Hummingbird
+        // long is not supported by Flow
         return localDateTimeToHighcharts(time);
     }
 
@@ -46,8 +45,8 @@ public class Measurement implements Serializable {
         return temperature;
     }
 
-    public String getSensor() {
-        return sensor;
-    }
+//    public String getSensor() {
+//        return sensor;
+//    }
 
 }

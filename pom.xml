@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.vaadin.artur</groupId>
 	<artifactId>temperature-monitor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<properties>
-		<hummingbird.version>0.0.16-SNAPSHOT</hummingbird.version>
+		<vaadin.version>10.0.1</vaadin.version>
 		<jetty.version>9.3.11.v20160721</jetty.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -18,22 +18,10 @@
 
 	<repositories>
 		<repository>
-			<id>hummingbird-internal-snapshots</id>
-			<url>https://repo.vaadin.com/nexus/content/repositories/hummingbird-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hummingbird-internal-release</id>
-			<url>https://repo.vaadin.com/nexus/content/repositories/hummingbird</url>
-		</repository>
-		<repository>
 			<id>vaadin-addons</id>
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -43,8 +31,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.vaadin</groupId>
-			<artifactId>hummingbird</artifactId>
-			<version>${hummingbird.version}</version>
+			<artifactId>vaadin</artifactId>
+			<version>${vaadin.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -60,26 +48,10 @@
 
 	<build>
 		<plugins>
-			<!-- The Jetty plugin allows us to easily test the development build by 
-				running jetty:run on the command line. -->
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jetty.version}</version>
-				<configuration>
-					<scanIntervalSeconds>-1</scanIntervalSeconds>
-					<stopPort>8081</stopPort>
-					<stopWait>5</stopWait>
-					<stopKey>foo</stopKey>
-					<webAppConfig>
-						<resourceBases>
-							<resourceBase>${project.basedir}/src/main/webapp</resourceBase>
-							<resourceBase>${project.basedir}/../../hummingbird/hummingbird/hummingbird-server/src/main/resources/META-INF/resources</resourceBase>
-							<resourceBase>${project.basedir}/../../hummingbird/hummingbird/hummingbird-client/target/classes/META-INF/resources</resourceBase>
-							<resourceBase>${project.basedir}/../../hummingbird/hummingbird/hummingbird-push/src/main/resources/META-INF/resources</resourceBase>
-						</resourceBases>
-					</webAppConfig>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

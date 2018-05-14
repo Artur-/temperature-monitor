@@ -1,10 +1,5 @@
 package org.vaadin.artur.temperature;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -18,20 +13,22 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
-import org.vaadin.artur.temperature.components.VaadinLineChart;
+import org.vaadin.artur.temperature.TemperatureView.TemperatureModel;
 
-import com.vaadin.annotations.Exclude;
-import com.vaadin.annotations.Uses;
-import com.vaadin.hummingbird.router.LocationChangeEvent;
-import com.vaadin.hummingbird.template.model.TemplateModel;
-import com.vaadin.ui.AttachEvent;
-import com.vaadin.ui.DetachEvent;
-import com.vaadin.ui.Template;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.HtmlImport;
+import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.templatemodel.Exclude;
+import com.vaadin.flow.templatemodel.TemplateModel;
 
-@Uses(VaadinLineChart.class)
-public class TemperatureView extends Template {
+@Tag("temperature-view")
+@HtmlImport("temperature-view.html")
+@Route("")
+public class TemperatureView extends PolymerTemplate<TemperatureModel> {
 
     private ScheduledExecutorService executor = Executors
             .newScheduledThreadPool(2);
@@ -42,13 +39,33 @@ public class TemperatureView extends Template {
 
     private transient volatile Map<String, LocalDateTime> lastQueryTime = new HashMap<>();
 
-    // private List<Sensor> sensors;
+    public static class SensorData {
+        private Sensor sensor;
+        private List<Measurement> measurements;
+
+        public Sensor getSensor() {
+            return sensor;
+        }
+
+        public void setSensor(Sensor sensor) {
+            this.sensor = sensor;
+        }
+
+        public List<Measurement> getMeasurements() {
+            return measurements;
+        }
+
+        @Exclude("time")
+        public void setMeasurements(List<Measurement> measurements) {
+            this.measurements = measurements;
+        }
+
+    }
 
     public interface TemperatureModel extends TemplateModel {
-        @Exclude("time")
-        void setLast24HMeasurements(List<Measurement> measurements);
+        void setLast24HMeasurements(List<SensorData> sensorData);
 
-        List<Measurement> getLast24HMeasurements();
+        List<SensorData> getLast24HMeasurements();
 
         double getChartsStart();
 
@@ -63,43 +80,25 @@ public class TemperatureView extends Template {
         // List<Measurement> getLast7DaysMeasurements();
     }
 
-    public TemperatureView() throws IOException {
-        super(getTemplate());
-        getModel().setSensors(connection.getSensors());
-    }
-
-    private static InputStream getTemplate() throws IOException {
-        String templateFileNameAndPath = TemperatureView.class.getSimpleName()
-                + ".html";
-        String templateFileName = new File(templateFileNameAndPath).getName();
-        InputStream templateContentStream = TemperatureView.class
-                .getResourceAsStream(templateFileName);
-        String template = IOUtils.toString(templateContentStream,
-                StandardCharsets.UTF_8);
-        String[] parts = template.split("#tpl#", 3);
-        StringBuilder loop = new StringBuilder();
-        String loopTemplate = parts[1];
-
-        List<Sensor> sensors = connection.getSensors();
-        sensors.forEach(sensor -> {
-            String sensorTag = loopTemplate
-                    .replaceAll("#name#", sensor.getDescription())
-                    .replaceAll("#id#", sensor.getId());
-            loop.append(sensorTag);
-        });
-        String result = parts[0] + loop.toString() + parts[2];
-        return new ByteArrayInputStream(
-                result.getBytes(StandardCharsets.UTF_8));
-    }
-
     @Override
     protected TemperatureModel getModel() {
-        return (TemperatureModel) super.getModel();
+        return super.getModel();
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        getModel().setSensors(connection.getSensors());
+        getModel().setLast24HMeasurements(new ArrayList<>());
+        getModel().setChartsStart(Measurement
+                .localDateTimeToHighcharts(LocalDateTime.now().minusDays(1)));
+        getModel().setChartsStart(1471205717557.0);
+        getModel().getSensors()
+                .forEach(sensor -> lastQueryTime.put(sensor.getId(),
+                        LocalDateTime.ofEpochSecond(1, 1, ZoneOffset.UTC)));
+
+        updateIfNewDataAvailable();
+
         if (scheduledTask != null) {
             Logger.getLogger(TemperatureView.class.getName())
                     .severe("A scheduledTask was defined in onAttach");
@@ -144,11 +143,25 @@ public class TemperatureView extends Template {
 
         if (ui.isPresent()) {
             ui.get().access(() -> {
-                getModel().getLast24HMeasurements().addAll(values);
+                findModelSensorData(sensor).setMeasurements(values);
             });
         } else {
-            getModel().getLast24HMeasurements().addAll(values);
+            findModelSensorData(sensor).setMeasurements(values);
         }
+    }
+
+    private SensorData findModelSensorData(Sensor sensor) {
+        List<SensorData> measurements = getModel().getLast24HMeasurements();
+        Optional<SensorData> data = measurements.stream()
+                .filter(sd -> sd.getSensor().equals(sensor)).findFirst();
+        if (data.isPresent()) {
+            return data.get();
+        }
+
+        SensorData sensorData = new SensorData();
+        sensorData.setSensor(sensor);
+        measurements.add(sensorData);
+        return sensorData;
     }
 
     private List<Measurement> limit(List<Measurement> values, int max) {
@@ -178,26 +191,4 @@ public class TemperatureView extends Template {
         }
     }
 
-    @Override
-    public void onLocationChange(LocationChangeEvent locationChangeEvent) {
-        super.onLocationChange(locationChangeEvent);
-
-        getModel().setLast24HMeasurements(new ArrayList<>());
-        getModel().setChartsStart(Measurement
-                .localDateTimeToHighcharts(LocalDateTime.now().minusDays(1)));
-        getModel().setChartsStart(1471205717557.0);
-        getModel().getSensors()
-                .forEach(sensor -> lastQueryTime.put(sensor.getId(),
-                        LocalDateTime.ofEpochSecond(1, 1, ZoneOffset.UTC)));
-
-        updateIfNewDataAvailable();
-
-        // lastQueryTime = LocalDateTime.now();
-        // LocalDateTime oneDayAgo = lastQueryTime.minusDays(1);
-
-        // List<Measurement> measurements = connection
-        // .getAllMeasurements(oneDayAgo);
-        // getModel().setLast24HMeasurements(measurements);
-
-    }
 }

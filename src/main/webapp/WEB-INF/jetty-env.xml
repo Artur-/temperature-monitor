@@ -8,8 +8,9 @@
 		<Arg>
 			<New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
 				<Set name="Url">jdbc:mysql://localhost:3306/temperature</Set>
-				<Set name="User">temperature</Set>
-				<Set name="Password">temperature</Set>
+				<Set name="user">temperature</Set>
+				<Set name="password">temperature</Set>
+				<Set name="dumpQueriesOnException">true</Set>
 			</New>
 		</Arg>
 	</New>
